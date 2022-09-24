@@ -69,10 +69,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Tạo mảng để lưu dữ liệu
         ArrayList<String> arrayList = new ArrayList<>();
-        arrayList.add("roadmap");
-        arrayList.add("satellite");
-        arrayList.add("hybrid");
-        arrayList.add("terrain");
+        arrayList.add("Roadmap");
+        arrayList.add("Satellite");
+        arrayList.add("Hybrid");
+        arrayList.add("Terrain");
 
         // ArrayAdapter dùng để hiển thị dữ liệu lên Spinner
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, arrayList);

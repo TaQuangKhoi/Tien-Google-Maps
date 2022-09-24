@@ -1,3 +1,3 @@
-- Đổi layer
+- ~~Đổi layer~~
 - Chỉ đường
 -

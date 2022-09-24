@@ -2,6 +2,7 @@ package com.taquangkhoi.googlemaps;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
@@ -86,6 +87,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        // Thêm nút Thu nhỏ phóng to
         mMap.getUiSettings().setZoomControlsEnabled(true);
+
+        // Thêm cử chỉ thu nhỏ, phóng to - Zoom
+        mMap.getUiSettings().setZoomGesturesEnabled(true);
+
+        // Thêm My Location Button
+        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != getPackageManager().PERMISSION_GRANTED
+
+                &&
+
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != getPackageManager().PERMISSION_GRANTED)
+        {
+            return;
+        }
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
     }
 }

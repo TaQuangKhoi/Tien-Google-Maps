@@ -1,6 +1,7 @@
 package com.taquangkhoi.googlemaps;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         addControls();
-        //addEvents();
+        addEvents();
     }
 
     private void addEvents() {
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void addControls() {
-        //spinner = findViewById(R.id.Spinner);
+        spinner = findViewById(R.id.Spinner);
 
         // Tạo mảng để lưu dữ liệu
         ArrayList<String> arrayList = new ArrayList<>();
@@ -76,7 +77,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // ArrayAdapter dùng để hiển thị dữ liệu lên Spinner
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, arrayList);
-        //spinner.setAdapter(arrayAdapter);
+        spinner.setAdapter(arrayAdapter);
+
+
     }
 
     @Override

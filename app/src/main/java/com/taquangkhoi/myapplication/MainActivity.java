@@ -1,18 +1,22 @@
 package com.taquangkhoi.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        RequestLocationPermission();
 
         addControls();
         addEvents();
@@ -93,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    // Hàm chạy khi Map đã sẵn sàng
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -104,21 +111,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomGesturesEnabled(true);
 
         // Thêm My Location Button
-        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != getPackageManager().PERMISSION_GRANTED
-
-                &&
-
-                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != getPackageManager().PERMISSION_GRANTED)
-        {
-            return;
-        }
-        mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        AddMyLocationButton();
     }
 
-    // Tìm kiếm địa điểm
+    // Event Tìm kiếm địa điểm của SearchView
     private void SearchViewEvents() {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -142,5 +138,53 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return false;
             }
         });
+    }
+
+    // Yêu cầu quyền truy cập vị trí
+    private void RequestLocationPermission(){
+        // Kiểm tra SDK
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+            return;
+        }
+
+        // Kiểm tra quyền đã được chấp thuận chưa
+        if(checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            AddMyLocationButton();
+            Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+        } else {
+            // Nếu chưa được chấp thuận thì yêu cầu chấp thuận
+            String[] permissions = {android.Manifest.permission.ACCESS_FINE_LOCATION};
+            requestPermissions(permissions, 1);
+        }
+    }
+
+    // Hàm đề thêm nút MyLocationButton
+    private void AddMyLocationButton(){
+        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != getPackageManager().PERMISSION_GRANTED
+
+                &&
+
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != getPackageManager().PERMISSION_GRANTED)
+        {
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+    }
+
+    // Kiểm tra kết quả Permission đã cho cho phéo hay chưa
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == 1){
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                AddMyLocationButton();
+                Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

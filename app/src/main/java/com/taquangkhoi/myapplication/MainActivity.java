@@ -122,11 +122,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 try {
                     String location = searchView.getQuery().toString();
                     List<Address> addresses = geocoder.getFromLocationName(location, 1);
-                    Address address = addresses.get(0);
-                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    mMap.clear();
-                    mMap.addMarker(new MarkerOptions().position(latLng).title(location));
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 80));
+                    if (addresses.size() > 0) {
+                        Address address = addresses.get(0);
+                        LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                        mMap.clear();
+                        mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+                    } else {
+                        mMap.clear();
+                        Toast.makeText(MainActivity.this, "Không tìm thấy địa điểm", Toast.LENGTH_SHORT).show();
+                    }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

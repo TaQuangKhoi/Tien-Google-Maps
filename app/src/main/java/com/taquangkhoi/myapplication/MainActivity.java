@@ -41,7 +41,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RequestLocationPermission();
+        // Dùng tru catch để tránh bị crash app
+        try {
+            RequestLocationPermission();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         addControls();
         addEvents();

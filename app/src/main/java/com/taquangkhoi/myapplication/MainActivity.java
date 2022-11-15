@@ -41,11 +41,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Dùng tru catch để tránh bị crash app
+        // Dùng try catch để tránh bị crash app
         try {
             RequestLocationPermission();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -153,14 +152,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // Yêu cầu quyền truy cập vị trí
-    private void RequestLocationPermission(){
+    private void RequestLocationPermission() {
         // Kiểm tra SDK
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return;
         }
 
         // Kiểm tra quyền đã được chấp thuận chưa
-        if(checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             AddMyLocationButton();
             Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
         } else {
@@ -171,15 +170,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // Hàm đề thêm nút MyLocationButton
-    private void AddMyLocationButton(){
-        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+    private void AddMyLocationButton() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != getPackageManager().PERMISSION_GRANTED
 
                 &&
 
                 ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != getPackageManager().PERMISSION_GRANTED)
-        {
+                        != getPackageManager().PERMISSION_GRANTED) {
             return;
         }
         mMap.setMyLocationEnabled(true);
@@ -190,8 +188,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == 1){
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 AddMyLocationButton();
                 Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
             } else {

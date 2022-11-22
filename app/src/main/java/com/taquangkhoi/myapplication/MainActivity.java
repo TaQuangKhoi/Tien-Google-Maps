@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class    MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     GoogleMap mMap;
     SupportMapFragment mapFragment;
     Spinner spinner;
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String type = spinner.getSelectedItem().toString();
                 switch (type) {
-                    case "Normal":
+                    case "Roadmap":
                         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                         break;
                     case "Satellite":

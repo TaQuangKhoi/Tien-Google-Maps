@@ -1,11 +1,5 @@
 package com.taquangkhoi.myapplication;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.app.SearchManager;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -13,6 +7,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,7 +15,12 @@ import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.gms.common.api.ResolvableApiException;
+
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -33,10 +33,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,24 +56,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Dùng try catch để tránh bị crash app
         try {
-            RequestLocationPermission();
+            requestLocationPermission();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         requestLocation();
 
         addControls();
         addEvents();
 
-        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-        //
+        // Hiện map trên màn hình
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
     private void addEvents() {
+        // Sự kiện khi chọn item trong spinner
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-        SearchViewEvents();
+        addSearchViewEvents();
     }
 
     private void addControls() {
@@ -132,11 +132,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomGesturesEnabled(true);
 
         // Thêm My Location Button
-        AddMyLocationButton();
+        addMyLocationButton();
     }
 
     // Event Tìm kiếm địa điểm của SearchView
-    private void SearchViewEvents() {
+    private void addSearchViewEvents() {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
@@ -145,6 +145,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     List<Address> addresses = geocoder.getFromLocationName(location, 1);
                     if (addresses.size() > 0) {
                         Address address = addresses.get(0);
+                        Log.i("APP","Address to show: " + address.toString());
                         LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
                         mMap.clear();
                         mMap.addMarker(new MarkerOptions().position(latLng).title(location));
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // Yêu cầu quyền truy cập vị trí
-    private void RequestLocationPermission() {
+    private void requestLocationPermission() {
         // Kiểm tra SDK
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return;
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Kiểm tra quyền đã được chấp thuận chưa
         if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            AddMyLocationButton();
+            addMyLocationButton();
             Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
         } else {
             // Nếu chưa được chấp thuận thì yêu cầu chấp thuận
@@ -186,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // Hàm đề thêm nút MyLocationButton
-    private void AddMyLocationButton() {
+    private void addMyLocationButton() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != getPackageManager().PERMISSION_GRANTED
 
@@ -206,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                AddMyLocationButton();
+                addMyLocationButton();
                 Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    // Method to request turn on Location
+    // Method yêu cầu bật GPS
     private void requestLocation() {
         // LocationRequest Builder
         LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY)
@@ -224,24 +225,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest);
 
+        // Lấy setting từ máy, để biết GPS đã bật chưa
         SettingsClient client = LocationServices.getSettingsClient(this);
+
+        // Task dùng để mở luồng (thread) mới để kiểm tra GPS
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
 
-        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                // All location settings are satisfied. The client can initialize location
-                // requests here.
-                // ...
-            }
-        });
-
+        // Nếu GPS chưa bật thì mở cửa sổ yêu cầu bật GPS
+        // thêm listener để bắt sự kiện khi người dùng chưa bật GPS (vì Task fail)
         task.addOnFailureListener(this, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 if (e instanceof ResolvableApiException) {
-                    // Location settings are not satisfied, but this can be fixed
-                    // by showing the user a dialog.
                     try {
                         // Show the dialog by calling startResolutionForResult(),
                         // and check the result in onActivityResult().

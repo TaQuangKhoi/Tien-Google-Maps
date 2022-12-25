@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -36,6 +37,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.Console;
 import java.io.IOException;
@@ -48,11 +50,15 @@ public class    MainActivity extends AppCompatActivity implements OnMapReadyCall
     Spinner spinner;
     Geocoder geocoder;
     SearchView searchView;
+    ImageButton btnExit;
+
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mAuth = FirebaseAuth.getInstance();
 
         // Dùng try catch để tránh bị crash app
         try {
@@ -99,11 +105,24 @@ public class    MainActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
         addSearchViewEvents();
+
+        btnExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mAuth.signOut();
+                Log.i("TAG", "onClick to Logout: " + mAuth.getCurrentUser());
+                if (mAuth.getCurrentUser() == null) {
+                    Toast.makeText(MainActivity.this, "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+        });
     }
 
     private void addControls() {
         spinner = findViewById(R.id.Spinner);
         searchView = findViewById(R.id.searchView);
+        btnExit = findViewById(R.id.ibtnExit);
 
         // Tạo mảng để lưu dữ liệu
         ArrayList<String> arrayList = new ArrayList<>();

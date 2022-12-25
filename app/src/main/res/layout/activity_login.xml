@@ -38,12 +38,14 @@
         app:layout_constraintTop_toBottomOf="@id/RlHeader">
 
         <EditText
+            android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:drawableRight="@drawable/email24"
             android:hint="Email" />
 
         <EditText
+            android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:drawableRight="@drawable/lock24"

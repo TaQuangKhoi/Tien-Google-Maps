@@ -7,10 +7,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.regex.Pattern;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -18,6 +21,7 @@ public class LoginActivity extends AppCompatActivity {
     TextView tvSingUp;
     TextView tvSingUp2;
     Button btnLogin;
+    EditText edtEmail, edtPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,16 +33,23 @@ public class LoginActivity extends AppCompatActivity {
         tvSingUp.setOnClickListener(onClickSignup());
         tvSingUp2.setOnClickListener(onClickSignup());
         btnLogin = findViewById(R.id.btn_login);
+        edtEmail = findViewById(R.id.etEmail);
+        edtPassword = findViewById(R.id.etPassword);
 
         mAuth = FirebaseAuth.getInstance();
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = tvSingUp.getText().toString();
-                String password = tvSingUp2.getText().toString();
+                String email = edtEmail.getText().toString();
+                String password = edtPassword.getText().toString();
 
-                if (email.isEmpty() || password.isEmpty()) {
+                if (email.isEmpty() || password.isEmpty()) { // để trống email
+                    // check email is wrong
+                    String regexPattern = "^(.+)@(\\S+)$";
+                    if (!Pattern.matches(regexPattern, email)) {
+                        edtEmail.setError("Email is wrong");
+                    }
                     return;
                 } else {
                     mAuth.signInWithEmailAndPassword(email, password)
@@ -48,9 +59,11 @@ public class LoginActivity extends AppCompatActivity {
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
                                 } else {
+                                    edtPassword.setError("Password is wrong");
                                     Log.i(TAG, "onComplete: " + task.getException().getMessage());
                                 }
                             });
+
                 }
             }
         });
@@ -77,5 +90,11 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         };
+    }
+
+    public static boolean patternMatches(String emailAddress, String regexPattern) {
+        return Pattern.compile(regexPattern)
+                .matcher(emailAddress)
+                .matches();
     }
 }

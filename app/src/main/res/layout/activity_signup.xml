@@ -39,24 +39,28 @@
         app:layout_constraintTop_toBottomOf="@id/RlHeader">
 
         <EditText
+            android:id="@+id/edt_username"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:drawableRight="@drawable/person_24"
             android:hint="UserName" />
 
         <EditText
+            android:id="@+id/edt_email"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:drawableRight="@drawable/email24"
             android:hint="Email" />
 
         <EditText
+            android:id="@+id/edt_password"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:drawableRight="@drawable/lock24"
             android:hint="PassWord" />
 
         <EditText
+            android:id="@+id/edt_confirm_password"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:drawableRight="@drawable/lock24"
@@ -67,6 +71,7 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/btn_signup"
         android:layout_width="150dp"
         android:layout_height="60dp"
         android:background="@drawable/shape_login_button"

@@ -14,19 +14,19 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 
-    <SearchView
-        android:id="@+id/searchView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:queryHint="Search"
-        android:iconifiedByDefault="false"
-        android:queryBackground="@null"
-        android:background="@drawable/bg_search_view"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginEnd="60dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"/>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:id="@+id/ibtnSearch"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/ic_search_24"
+            />
+    </RelativeLayout>
+
 
     <Spinner
         android:id="@+id/Spinner"
@@ -47,16 +47,6 @@
         android:layout_marginBottom="16dp"
         android:background="@drawable/ic_exit"
         android:layout_above="@id/Spinner"
-        />
-
-    <ImageButton
-        android:id="@+id/ibtnSearch"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/ic_search_24"
-        android:layout_below="@id/searchView"
         />
 
 </RelativeLayout>

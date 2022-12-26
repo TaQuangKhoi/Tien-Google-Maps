@@ -34,7 +34,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -48,7 +47,6 @@ import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -115,7 +113,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-        addSearchViewEvents();
 
         btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void addControls() {
         spinner = findViewById(R.id.Spinner);
-        searchView = findViewById(R.id.searchView);
         btnExit = findViewById(R.id.ibtnExit);
         ibtnSearch = findViewById(R.id.ibtnSearch);
 
@@ -221,49 +217,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // Event Tìm kiếm địa điểm của SearchView
     private void addSearchViewEvents() {
-        searchView.setOnClickListener(v -> {
 
-            onSearchCalled();
-            // Set the fields to specify which types of place data to
-            // return after the user has made a selection.
-//            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
-
-            // Start the autocomplete intent.
-//            Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-//                    .build(this);
-//            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
-        });
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                try {
-                    String location = searchView.getQuery().toString();
-
-                    List<Address> addresses = geocoder.getFromLocationName(location, 1);
-
-                    if (addresses.size() > 0) {
-                        Address address = addresses.get(0);
-                        Log.i("APP","Address to show: " + address.toString());
-                        LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                        mMap.clear();
-                        mMap.addMarker(new MarkerOptions().position(latLng).title(location));
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-                    } else {
-                        mMap.clear();
-                        Toast.makeText(MainActivity.this, "Không tìm thấy địa điểm", Toast.LENGTH_SHORT).show();
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
-            }
-        });
     }
 
     // Yêu cầu quyền truy cập vị trí

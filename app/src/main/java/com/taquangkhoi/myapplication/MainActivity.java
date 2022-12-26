@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 
 import com.google.android.gms.common.api.Status;
@@ -41,6 +42,14 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPhotoRequest;
+import com.google.android.libraries.places.api.net.FetchPhotoResponse;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FetchPlaceResponse;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
@@ -63,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FirebaseAuth mAuth;
     private static int AUTOCOMPLETE_REQUEST_CODE = 1;
     private static final String TAG = "MainActivity";
+
+    Place place;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                Place place = Autocomplete.getPlaceFromIntent(data);
+                place = Autocomplete.getPlaceFromIntent(data);
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId() + ", " + place.getAddress());
                 Toast.makeText(MainActivity.this, "ID: " + place.getId() + "address:" + place.getAddress() +
                         "Name:" + place.getName() + " latlong: " + place.getLatLng(), Toast.LENGTH_LONG).show();
@@ -307,9 +318,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Log.i("Marker", "Marker Clicked");
-        // what data in Marker?
-        // get data from Marker
-        // show data in Dialog
+//        PlacesClient placesClient = Places.createClient(this);
+//
+//        // Specify the fields to return.
+//        final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+//
+//        // Construct a request object, passing the place ID and fields array.
+//        final FetchPlaceRequest request = FetchPlaceRequest.newInstance(place.getId(), placeFields);
+//
+//        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
+//            Place place = response.getPlace();
+//
+//            Log.i(TAG, "Place found: " + place.getName());
+//        }).addOnFailureListener((exception) -> {
+//            if (exception instanceof ApiException) {
+//                final ApiException apiException = (ApiException) exception;
+//                Log.e(TAG, "Place not found: " + exception.getMessage());
+//                final int statusCode = apiException.getStatusCode();
+//                // TODO: Handle error with given status code.
+//            }
+//        });
         showBottomSheetDialog();
         return false;
     }
@@ -318,7 +346,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(R.layout.location_info);
 
-        TextView textView = bottomSheetDialog.findViewById(R.id.location_name);
+        TextView tvwName = bottomSheetDialog.findViewById(R.id.location_name);
+        TextView tvwAddress = bottomSheetDialog.findViewById(R.id.location_address);
+
+        tvwName.setText(place.getName());
+        tvwAddress.setText(place.getAddress());
 
         bottomSheetDialog.show();
     }

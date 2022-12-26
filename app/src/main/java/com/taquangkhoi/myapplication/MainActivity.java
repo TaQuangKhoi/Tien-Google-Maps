@@ -3,7 +3,6 @@ package com.taquangkhoi.myapplication;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -45,6 +45,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -305,7 +306,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
+        Log.i("Marker", "Marker Clicked");
+        // what data in Marker?
+        // get data from Marker
+        // show data in Dialog
+        showBottomSheetDialog();
         return false;
+    }
+
+    private void showBottomSheetDialog() {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        bottomSheetDialog.setContentView(R.layout.location_info);
+
+        TextView textView = bottomSheetDialog.findViewById(R.id.location_name);
+
+        bottomSheetDialog.show();
     }
 
 }

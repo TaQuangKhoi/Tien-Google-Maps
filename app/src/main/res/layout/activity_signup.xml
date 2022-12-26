@@ -57,7 +57,8 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:drawableRight="@drawable/lock24"
-            android:hint="PassWord" />
+            android:hint="PassWord"
+            android:inputType="textPassword" />
 
         <EditText
             android:id="@+id/edt_confirm_password"

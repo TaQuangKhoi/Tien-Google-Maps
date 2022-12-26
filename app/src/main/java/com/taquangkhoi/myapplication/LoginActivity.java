@@ -63,7 +63,6 @@ public class LoginActivity extends AppCompatActivity {
                                     Log.i(TAG, "onComplete: " + task.getException().getMessage());
                                 }
                             });
-
                 }
             }
         });

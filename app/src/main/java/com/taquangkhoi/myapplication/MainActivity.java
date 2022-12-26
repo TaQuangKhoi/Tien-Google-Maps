@@ -1,6 +1,6 @@
 package com.taquangkhoi.myapplication;
 
-import android.app.SearchManager;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -17,11 +17,13 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.common.api.ResolvableApiException;
 
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -33,26 +35,35 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Marker;
 
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class    MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     GoogleMap mMap;
     SupportMapFragment mapFragment;
     Spinner spinner;
     Geocoder geocoder;
     SearchView searchView;
-    ImageButton btnExit;
+    ImageButton btnExit, ibtnSearch;
 
     private FirebaseAuth mAuth;
+    private static int AUTOCOMPLETE_REQUEST_CODE = 1;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,12 +128,20 @@ public class    MainActivity extends AppCompatActivity implements OnMapReadyCall
                 }
             }
         });
+
+        ibtnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSearchCalled();
+            }
+        });
     }
 
     private void addControls() {
         spinner = findViewById(R.id.Spinner);
         searchView = findViewById(R.id.searchView);
         btnExit = findViewById(R.id.ibtnExit);
+        ibtnSearch = findViewById(R.id.ibtnSearch);
 
         // Tạo mảng để lưu dữ liệu
         ArrayList<String> arrayList = new ArrayList<>();
@@ -150,18 +169,78 @@ public class    MainActivity extends AppCompatActivity implements OnMapReadyCall
         // Thêm cử chỉ thu nhỏ, phóng to - Zoom
         mMap.getUiSettings().setZoomGesturesEnabled(true);
 
+        mMap.setOnMarkerClickListener(this);
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), BuildConfig.API_KEY);
+        }
+
+        // Create a new Places client instance.
+        PlacesClient placesClient = Places.createClient(this);
+
         // Thêm My Location Button
         addMyLocationButton();
     }
 
+    public void onSearchCalled() {
+        // Set the fields to specify which types of place data to return.
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
+        // Start the autocomplete intent.
+        Intent intent = new Autocomplete.IntentBuilder(
+                AutocompleteActivityMode.FULLSCREEN, fields)
+                .setCountry("VN")
+                .build(this);
+        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId() + ", " + place.getAddress());
+                Toast.makeText(MainActivity.this, "ID: " + place.getId() + "address:" + place.getAddress() +
+                        "Name:" + place.getName() + " latlong: " + place.getLatLng(), Toast.LENGTH_LONG).show();
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName()));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15));
+                String address = place.getAddress();
+                // do query with address
+
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                // TODO: Handle the error.
+                Status status = Autocomplete.getStatusFromIntent(data);
+                Toast.makeText(MainActivity.this, "Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
+                Log.i(TAG, status.getStatusMessage());
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
+        }
+    }
+
     // Event Tìm kiếm địa điểm của SearchView
     private void addSearchViewEvents() {
+        searchView.setOnClickListener(v -> {
+
+            onSearchCalled();
+            // Set the fields to specify which types of place data to
+            // return after the user has made a selection.
+//            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+
+            // Start the autocomplete intent.
+//            Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+//                    .build(this);
+//            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+        });
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
                 try {
                     String location = searchView.getQuery().toString();
+
                     List<Address> addresses = geocoder.getFromLocationName(location, 1);
+
                     if (addresses.size() > 0) {
                         Address address = addresses.get(0);
                         Log.i("APP","Address to show: " + address.toString());
@@ -268,6 +347,11 @@ public class    MainActivity extends AppCompatActivity implements OnMapReadyCall
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker) {
+        return false;
     }
 
 }

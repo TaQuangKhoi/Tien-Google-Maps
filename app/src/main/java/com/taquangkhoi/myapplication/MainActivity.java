@@ -58,9 +58,18 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Text;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     GoogleMap mMap;
@@ -76,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String TAG = "MainActivity";
 
     Place place;
+
+    private final OkHttpClient client = new OkHttpClient();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -320,24 +331,92 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Log.i("Marker", "Marker Clicked");
-
-        showBottomSheetDialog();
+        String placeId = place.getId();
+        try {
+            showBottomSheetDialog(placeId);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
-    private void showBottomSheetDialog() {
+    private void showBottomSheetDialog(String placeId) throws InterruptedException {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(R.layout.location_info);
 
-//        TextView tvwName = bottomSheetDialog.findViewById(R.id.location_name);
-//        TextView tvwAddress = bottomSheetDialog.findViewById(R.id.location_address);
-//
-//        tvwName.setText(place.getName());
-//        tvwAddress.setText(place.getAddress());
+        TextView tvwAdress, tvwOpenHours, tvwWebsite, tvwPhone;
+        tvwAdress = bottomSheetDialog.findViewById(R.id.tvw_address);
+        tvwOpenHours = bottomSheetDialog.findViewById(R.id.tvw_open_hours);
+        tvwWebsite = bottomSheetDialog.findViewById(R.id.tvw_website);
+        tvwPhone = bottomSheetDialog.findViewById(R.id.tvw_email);
+
+        String urlGetPlaceDetail = "https://maps.googleapis.com/maps/api/place/details/json" +
+                "?place_id=" + placeId +
+                "&key=" + BuildConfig.API_KEY;
+
+        Log.i(TAG, "URL " + urlGetPlaceDetail);
+
+        Request request = new Request.Builder()
+                .url(urlGetPlaceDetail)
+                .build();
+
+        final String[] response = {null};
+        Bundle bundle = new Bundle();
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    response[0] = runTest(urlGetPlaceDetail);
+
+                    // parse json
+                    JSONObject obj = new JSONObject(response[0]);
+                    Log.i(TAG, "showBottomSheetDialog run: " + obj.toString());
+
+                    bundle.putString("address", obj.getJSONObject("result").getString("formatted_address"));
+                    if(obj.getJSONObject("result").has("opening_hours")) {
+                        bundle.putString("open_hours", "Đang mở");
+                    } else {
+                        bundle.putString("open_hours", "Không có thông tin");
+                    }
+                    if(obj.getJSONObject("result").has("website")) {
+                        bundle.putString("website", obj.getJSONObject("result").getString("website"));
+                    } else {
+                        bundle.putString("website", "Không có thông tin");
+                    }
+                    if(obj.getJSONObject("result").has("international_phone_number")) {
+                        bundle.putString("phone", obj.getJSONObject("result").getString("international_phone_number"));
+                    } else {
+                        bundle.putString("phone", "Không có thông tin");
+                    }
+
+
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+        thread.join();
+
+        tvwAdress.setText(bundle.getString("address"));
+        tvwOpenHours.setText(bundle.getString("open_hours"));
+        tvwWebsite.setText(bundle.getString("website"));
+        tvwPhone.setText(bundle.getString("phone"));
 
         bottomSheetDialog.show();
     }
 
+    private String runTest(String url) throws IOException {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        }
+    }
 
     public void searchSchool() {
         PlacesClient placesClient = Places.createClient(this);

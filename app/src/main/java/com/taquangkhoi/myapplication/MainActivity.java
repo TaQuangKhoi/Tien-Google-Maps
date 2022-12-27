@@ -431,12 +431,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Log.i("Marker", "Marker Clicked");
-        String placeId = place.getId();
-        try {
-            showBottomSheetDialog(placeId);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (place != null) {
+            String placeId = place.getId();
+            try {
+                showBottomSheetDialog(placeId);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
         return false;
     }
 

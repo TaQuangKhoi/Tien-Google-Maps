@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -67,7 +68,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Spinner spinner;
     Geocoder geocoder;
     SearchView searchView;
-    ImageButton btnExit, ibtnSearch;
+    ImageButton btnExit;
+    ImageView ibtnSearch;
 
     private FirebaseAuth mAuth;
     private static int AUTOCOMPLETE_REQUEST_CODE = 1;
@@ -318,26 +320,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Log.i("Marker", "Marker Clicked");
-//        PlacesClient placesClient = Places.createClient(this);
-//
-//        // Specify the fields to return.
-//        final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
-//
-//        // Construct a request object, passing the place ID and fields array.
-//        final FetchPlaceRequest request = FetchPlaceRequest.newInstance(place.getId(), placeFields);
-//
-//        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
-//            Place place = response.getPlace();
-//
-//            Log.i(TAG, "Place found: " + place.getName());
-//        }).addOnFailureListener((exception) -> {
-//            if (exception instanceof ApiException) {
-//                final ApiException apiException = (ApiException) exception;
-//                Log.e(TAG, "Place not found: " + exception.getMessage());
-//                final int statusCode = apiException.getStatusCode();
-//                // TODO: Handle error with given status code.
-//            }
-//        });
+
         showBottomSheetDialog();
         return false;
     }
@@ -346,13 +329,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(R.layout.location_info);
 
-        TextView tvwName = bottomSheetDialog.findViewById(R.id.location_name);
-        TextView tvwAddress = bottomSheetDialog.findViewById(R.id.location_address);
-
-        tvwName.setText(place.getName());
-        tvwAddress.setText(place.getAddress());
+//        TextView tvwName = bottomSheetDialog.findViewById(R.id.location_name);
+//        TextView tvwAddress = bottomSheetDialog.findViewById(R.id.location_address);
+//
+//        tvwName.setText(place.getName());
+//        tvwAddress.setText(place.getAddress());
 
         bottomSheetDialog.show();
     }
 
+
+    public void searchSchool() {
+        PlacesClient placesClient = Places.createClient(this);
+
+        // Specify the fields to return.
+        final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+
+        // Construct a request object, passing the place ID and fields array.
+        final FetchPlaceRequest request = FetchPlaceRequest.newInstance(place.getId(), placeFields);
+
+        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
+            Place place = response.getPlace();
+
+            Log.i(TAG, "Place found: " + place.getName());
+        }).addOnFailureListener((exception) -> {
+            if (exception instanceof ApiException) {
+                final ApiException apiException = (ApiException) exception;
+                Log.e(TAG, "Place not found: " + exception.getMessage());
+                final int statusCode = apiException.getStatusCode();
+                // TODO: Handle error with given status code.
+            }
+        });
+
+        // google maps search place by type
+    }
 }

@@ -9,6 +9,7 @@ public class School {
     private String address;
     private String phone;
     private LatLng latLng;
+    private String placeId;
 
     public School(String name, String address, String phone) {
         this.name = name;
@@ -16,7 +17,7 @@ public class School {
         this.phone = phone;
     }
 
-    public School(String name, String address, String Lat, String Lng) {
+    public School(String name, String address, String Lat, String Lng, String placeId) {
         this.name = name;
         this.address = address;
 
@@ -26,6 +27,7 @@ public class School {
         } catch (NumberFormatException e) {
             Log.i("School", "School error: " + e.getMessage());
         }
+        this.placeId = placeId;
     }
 
     public String getName() {
@@ -62,5 +64,13 @@ public class School {
 
     public String toString() {
         return "School: " + name + " " + address + " " + phone + " " + latLng;
+    }
+
+    public String getPlaceId() {
+        return placeId;
+    }
+
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
     }
 }

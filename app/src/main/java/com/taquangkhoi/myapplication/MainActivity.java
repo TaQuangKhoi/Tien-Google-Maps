@@ -127,6 +127,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         addControls();
         addEvents();
 
+        // Hiện map trên màn hình
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = new LocationRequest.Builder(TimeUnit.SECONDS.toMillis(60))
                 .build();
@@ -190,9 +194,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 });
 
-        // Hiện map trên màn hình
-        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+
     }
 
     private void addEvents() {
@@ -299,6 +301,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Thêm My Location Button
         addMyLocationButton();
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+
+            }
+        });
     }
 
     public void onSearchCalled() {
@@ -533,7 +542,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .build();
 
         final String[] response = {null};
-        Bundle bundle = new Bundle();
         List<School> schools = new ArrayList<>();
 
         Thread thread = new Thread() {
@@ -545,7 +553,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     // parse json
                     JSONObject obj = new JSONObject(response[0]);
-                    Log.i(TAG, "searchSchool run: " + obj.toString());
+                    Log.i(TAG, "searchSchool run: " + obj);
 
                     JSONArray results = obj.getJSONArray("results");
 
@@ -559,10 +567,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 results.getJSONObject(i).getString("name"),
                                 results.getJSONObject(i).getString("vicinity"),
                                 results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lat"),
-                                results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lat")
+                                results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lat"),
+                                results.getJSONObject(i).getString("place_id")
                         ));
                     }
-
 
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
@@ -572,22 +580,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         thread.start();
         thread.join();
 
-        MarkerOptions markerOptions = new MarkerOptions();
-
-
         School school = schools.get(0);
         Log.i(TAG, "searchSchool: " + school.toString());
-        // got to my current loction
+//        // got to my current loction
         LatLng latLng = school.getLatLng();
-
-        markerOptions.position(latLng);
-        markerOptions.title(school.getName());
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        mMap.addMarker(markerOptions);
-        Log.i(TAG, "searchSchool: marker added?");
+//
+//        markerOptions.position(latLng);
+//        markerOptions.title(school.getName());
+//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+//        mMap.addMarker(markerOptions);
+//        Log.i(TAG, "searchSchool: marker added?");
 
         // add Marker
-
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title(latLng.latitude + " : " + latLng.longitude);
+        mMap.clear();
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+        mMap.addMarker(markerOptions);
 
 //        PlacesClient placesClient = Places.createClient(this);
 //

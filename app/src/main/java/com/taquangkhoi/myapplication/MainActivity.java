@@ -28,7 +28,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 
 import com.google.android.gms.common.api.Status;
@@ -46,7 +45,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
@@ -56,15 +54,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.TypeFilter;
-import com.google.android.libraries.places.api.net.FetchPhotoRequest;
-import com.google.android.libraries.places.api.net.FetchPhotoResponse;
-import com.google.android.libraries.places.api.net.FetchPlaceRequest;
-import com.google.android.libraries.places.api.net.FetchPlaceResponse;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
@@ -571,7 +560,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 results.getJSONObject(i).getString("name"),
                                 results.getJSONObject(i).getString("vicinity"),
                                 results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lat"),
-                                results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lat"),
+                                results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lng"),
                                 results.getJSONObject(i).getString("place_id")
                         ));
                     }
@@ -584,46 +573,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         thread.start();
         thread.join();
 
-        School school = schools.get(0);
-        Log.i(TAG, "searchSchool: " + school.toString());
-//        // got to my current loction
-        LatLng latLng = school.getLatLng();
-//
-//        markerOptions.position(latLng);
-//        markerOptions.title(school.getName());
-//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-//        mMap.addMarker(markerOptions);
-//        Log.i(TAG, "searchSchool: marker added?");
+        // get current LatLng
+        LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
 
-        // add Marker
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title(latLng.latitude + " : " + latLng.longitude);
-        mMap.clear();
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-        mMap.addMarker(markerOptions);
+        for (School school : schools) {
+            mMap.addMarker(new MarkerOptions()
+                    .position(school.getLatLng())
+                    .title(school.getName())
+                    .snippet(school.getAddress())
+                    );
+        }
 
-//        PlacesClient placesClient = Places.createClient(this);
-//
-//        // Specify the fields to return.
-//        final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
-//
-//        // Construct a request object, passing the place ID and fields array.
-//        final FetchPlaceRequest request = FetchPlaceRequest.newInstance(place.getId(), placeFields);
-//
-//        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
-//            Place place = response.getPlace();
-//
-//            Log.i(TAG, "Place found: " + place.getName());
-//        }).addOnFailureListener((exception) -> {
-//            if (exception instanceof ApiException) {
-//                final ApiException apiException = (ApiException) exception;
-//                Log.e(TAG, "Place not found: " + exception.getMessage());
-//                final int statusCode = apiException.getStatusCode();
-//                // TODO: Handle error with given status code.
-//            }
-//        });
-
-        // google maps search place by type
     }
 }

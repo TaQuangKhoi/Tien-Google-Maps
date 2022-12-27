@@ -98,26 +98,29 @@
         tools:ignore="MissingConstraints" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/relativeLayout">
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayout"
+        app:layout_constraintVertical_bias="0.0">
 
-        <ImageButton
+        <ImageView
             android:id="@+id/ibtnGoogle"
-            android:layout_width="wrap_content"
-            android:src="@drawable/person_24"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_margin="15dp"
-            android:layout_height="wrap_content"/>
+            android:src="@drawable/google_icon" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/ibtnFacebook"
-            android:layout_width="wrap_content"
-            android:src="@drawable/person_24"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_margin="15dp"
-            android:layout_height="wrap_content"/>
+            android:src="@drawable/person_24" />
 
     </LinearLayout>
 

@@ -20,7 +20,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/llSearch"
         android:layout_alignStart="@+id/llSearch"
-        android:src="@drawable/ic_exit" />
+        android:src="@drawable/ic_exit"
+        android:padding="20dp"/>
 
     <LinearLayout
         android:id="@+id/llSearch"

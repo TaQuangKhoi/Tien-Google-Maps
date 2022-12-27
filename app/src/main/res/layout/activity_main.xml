@@ -16,12 +16,12 @@
 
     <ImageButton
         android:id="@+id/ibtnSchool"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="fitCenter"
         android:layout_below="@id/llSearch"
         android:layout_alignStart="@+id/llSearch"
-        android:src="@drawable/ic_exit"
-        android:padding="20dp"/>
+        android:src="@drawable/graduation_cap" />
 
     <LinearLayout
         android:id="@+id/llSearch"

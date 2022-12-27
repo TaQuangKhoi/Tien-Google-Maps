@@ -1,9 +1,12 @@
 package com.taquangkhoi.myapplication;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,13 +23,18 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -36,10 +44,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -58,6 +69,7 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
@@ -66,6 +78,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -77,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Spinner spinner;
     Geocoder geocoder;
     SearchView searchView;
-    ImageButton btnExit;
+    ImageButton btnExit, ibtnSchool;
     ImageView ibtnSearch;
 
     private FirebaseAuth mAuth;
@@ -87,6 +101,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Place place;
 
     private final OkHttpClient client = new OkHttpClient();
+
+    // FusedLocationProviderClient - Main class for receiving location updates.
+    FusedLocationProviderClient fusedLocationProviderClient;
+    LocationRequest locationRequest;
+    LocationCallback locationCallback;
+    Location currentLocation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +126,69 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         addControls();
         addEvents();
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        locationRequest = new LocationRequest.Builder(TimeUnit.SECONDS.toMillis(60))
+                .build();
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
+                super.onLocationAvailability(locationAvailability);
+            }
+
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                if (locationResult.getLastLocation() != null) {
+                    //currentLocation = locationResult.getLocations()[0];
+                    double latitude = currentLocation.getLatitude();
+                    double longitude = currentLocation.getLongitude();
+                    Log.i(TAG, "onLocationResult: " + latitude + " " + longitude);
+                }
+            }
+        };
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            // Logic to handle location object
+                            Log.i(TAG, "onSuccess getLastLocation: " + location.getLatitude() + " " + location.getLongitude());
+                            currentLocation = location;
+                            Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                            List<Address> addresses = null;
+                            try {
+                                addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            String cityName = addresses.get(0).getLocality();
+//                            textCityName1.setText(cityName);
+                            String stateName = addresses.get(0).getAddressLine(0);
+                            String countryName = addresses.get(0).getCountryName();
+
+                            Log.i(TAG, "onSuccess: " + cityName + ", " + stateName + ", " + countryName);
+                        } else {
+                            Log.i(TAG, "onSuccess getLastLocation: null");
+                        }
+                    }
+                });
 
         // Hiện map trên màn hình
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -157,12 +241,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 onSearchCalled();
             }
         });
+
+        ibtnSchool.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    searchSchool();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //Intent intent = new Intent(MainActivity.this, SchoolActivity.class);
+                //startActivity(intent);
+            }
+        });
     }
 
     private void addControls() {
         spinner = findViewById(R.id.Spinner);
         btnExit = findViewById(R.id.ibtnExit);
         ibtnSearch = findViewById(R.id.ibtnSearch);
+        ibtnSchool = findViewById(R.id.ibtnSchool);
 
         // Tạo mảng để lưu dữ liệu
         ArrayList<String> arrayList = new ArrayList<>();
@@ -375,22 +473,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.i(TAG, "showBottomSheetDialog run: " + obj.toString());
 
                     bundle.putString("address", obj.getJSONObject("result").getString("formatted_address"));
-                    if(obj.getJSONObject("result").has("opening_hours")) {
+                    if (obj.getJSONObject("result").has("opening_hours")) {
                         bundle.putString("open_hours", "Đang mở");
                     } else {
                         bundle.putString("open_hours", "Không có thông tin");
                     }
-                    if(obj.getJSONObject("result").has("website")) {
+                    if (obj.getJSONObject("result").has("website")) {
                         bundle.putString("website", obj.getJSONObject("result").getString("website"));
                     } else {
                         bundle.putString("website", "Không có thông tin");
                     }
-                    if(obj.getJSONObject("result").has("international_phone_number")) {
+                    if (obj.getJSONObject("result").has("international_phone_number")) {
                         bundle.putString("phone", obj.getJSONObject("result").getString("international_phone_number"));
                     } else {
                         bundle.putString("phone", "Không có thông tin");
                     }
-
 
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
@@ -418,27 +515,100 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void searchSchool() {
-        PlacesClient placesClient = Places.createClient(this);
+    public void searchSchool() throws InterruptedException {
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 
-        // Specify the fields to return.
-        final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+        String urlNearbySearchSchool = "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
+                "?key=" + BuildConfig.API_KEY +
+                "&location=" + currentLocation.getLatitude() +
+                "%2C" + currentLocation.getLongitude() +
+                "&radius=500" +
+                "&type=school";
 
-        // Construct a request object, passing the place ID and fields array.
-        final FetchPlaceRequest request = FetchPlaceRequest.newInstance(place.getId(), placeFields);
+        Log.i(TAG, "searchSchool URL " + urlNearbySearchSchool);
 
-        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
-            Place place = response.getPlace();
+        Request request = new Request.Builder()
+                .url(urlNearbySearchSchool)
+                .build();
 
-            Log.i(TAG, "Place found: " + place.getName());
-        }).addOnFailureListener((exception) -> {
-            if (exception instanceof ApiException) {
-                final ApiException apiException = (ApiException) exception;
-                Log.e(TAG, "Place not found: " + exception.getMessage());
-                final int statusCode = apiException.getStatusCode();
-                // TODO: Handle error with given status code.
+        final String[] response = {null};
+        Bundle bundle = new Bundle();
+        List<School> schools = new ArrayList<>();
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    response[0] = runTest(urlNearbySearchSchool);
+
+                    // parse json
+                    JSONObject obj = new JSONObject(response[0]);
+                    Log.i(TAG, "searchSchool run: " + obj.toString());
+
+                    JSONArray results = obj.getJSONArray("results");
+
+                    for (int i = 0; i < (results.length() < 10 ? results.length() : 10); i++) {
+                        Log.i(TAG, "searchSchool run: " + i + " " + results.getJSONObject(i).getString("name")
+                                + " " + results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lat")
+                                + " " + results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lng")
+                                + " " + results.getJSONObject(i).getString("vicinity")
+                        );
+                        schools.add(new School(
+                                results.getJSONObject(i).getString("name"),
+                                results.getJSONObject(i).getString("vicinity"),
+                                results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lat"),
+                                results.getJSONObject(i).getJSONObject("geometry").getJSONObject("location").getString("lat")
+                        ));
+                    }
+
+
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
             }
-        });
+        };
+        thread.start();
+        thread.join();
+
+        MarkerOptions markerOptions = new MarkerOptions();
+
+
+        School school = schools.get(0);
+        Log.i(TAG, "searchSchool: " + school.toString());
+        // got to my current loction
+        LatLng latLng = school.getLatLng();
+
+        markerOptions.position(latLng);
+        markerOptions.title(school.getName());
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        mMap.addMarker(markerOptions);
+        Log.i(TAG, "searchSchool: marker added?");
+
+        // add Marker
+
+
+//        PlacesClient placesClient = Places.createClient(this);
+//
+//        // Specify the fields to return.
+//        final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+//
+//        // Construct a request object, passing the place ID and fields array.
+//        final FetchPlaceRequest request = FetchPlaceRequest.newInstance(place.getId(), placeFields);
+//
+//        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
+//            Place place = response.getPlace();
+//
+//            Log.i(TAG, "Place found: " + place.getName());
+//        }).addOnFailureListener((exception) -> {
+//            if (exception instanceof ApiException) {
+//                final ApiException apiException = (ApiException) exception;
+//                Log.e(TAG, "Place not found: " + exception.getMessage());
+//                final int statusCode = apiException.getStatusCode();
+//                // TODO: Handle error with given status code.
+//            }
+//        });
 
         // google maps search place by type
     }

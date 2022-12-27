@@ -106,12 +106,14 @@
         app:layout_constraintTop_toBottomOf="@+id/relativeLayout">
 
         <ImageButton
+            android:id="@+id/ibtnGoogle"
             android:layout_width="wrap_content"
             android:src="@drawable/person_24"
             android:layout_margin="15dp"
             android:layout_height="wrap_content"/>
 
         <ImageButton
+            android:id="@+id/ibtnFacebook"
             android:layout_width="wrap_content"
             android:src="@drawable/person_24"
             android:layout_margin="15dp"

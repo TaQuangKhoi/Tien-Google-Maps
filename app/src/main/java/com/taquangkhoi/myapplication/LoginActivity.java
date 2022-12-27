@@ -1,5 +1,6 @@
 package com.taquangkhoi.myapplication;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -8,8 +9,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.identity.SignInClient;
+import com.google.android.gms.auth.api.identity.SignInCredential;
+import com.google.android.gms.common.api.ApiException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -22,6 +29,10 @@ public class LoginActivity extends AppCompatActivity {
     TextView tvSingUp2;
     Button btnLogin;
     EditText edtEmail, edtPassword;
+    ImageButton ibtnGoogle, ibtnFacebook;
+
+    private SignInClient oneTapClient;
+    private BeginSignInRequest signInRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +46,21 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btn_login);
         edtEmail = findViewById(R.id.etEmail);
         edtPassword = findViewById(R.id.etPassword);
+        ibtnGoogle = findViewById(R.id.ibtnGoogle);
+        ibtnFacebook = findViewById(R.id.ibtnFacebook);
 
         mAuth = FirebaseAuth.getInstance();
+
+        oneTapClient = Identity.getSignInClient(this);
+        signInRequest = BeginSignInRequest.builder()
+                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        // Your server's client ID, not your Android client ID.
+                        .setServerClientId(getString(R.string.default_web_client_id))
+                        // Only show accounts previously used to sign in.
+                        .setFilterByAuthorizedAccounts(true)
+                        .build())
+                .build();
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,6 +90,49 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+
+        ibtnGoogle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Intent intent = new Intent(LoginActivity.this, GoogleLoginActivity.class);
+                //startActivity(intent);
+            }
+        });
+
+        ibtnFacebook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Intent intent = new Intent(LoginActivity.this, FacebookLoginActivity.class);
+                //startActivity(intent);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+//        switch (requestCode) {
+//            case REQ_ONE_TAP:
+//                try {
+//                    SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
+//                    String idToken = credential.getGoogleIdToken();
+//                    String username = credential.getId();
+//                    String password = credential.getPassword();
+//                    if (idToken !=  null) {
+//                        // Got an ID token from Google. Use it to authenticate
+//                        // with your backend.
+//                        Log.d(TAG, "Got ID token.");
+//                    } else if (password != null) {
+//                        // Got a saved username and password. Use them to authenticate
+//                        // with your backend.
+//                        Log.d(TAG, "Got password.");
+//                    }
+//                } catch (ApiException e) {
+//                    // ...
+//                }
+//                break;
+//        }
     }
 
     @Override

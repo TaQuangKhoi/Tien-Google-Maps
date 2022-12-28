@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -59,11 +60,14 @@ public class SignupActivity extends AppCompatActivity {
                                         Intent intent = new Intent(SignupActivity.this, MainActivity.class);
                                         startActivity(intent);
                                     } else {
-                                        Log.i(TAG, "onComplete: " + task.getException().getMessage());
+                                        Toast.makeText(SignupActivity.this, task.getException().getMessage(),
+                                                Toast.LENGTH_SHORT).show();
+                                        Log.i(TAG, "onComplete error: " + task.getException().getMessage());
                                     }
                                 });
                     }
                     else {
+                        Toast.makeText(SignupActivity.this, "Password and confirm password not match", Toast.LENGTH_SHORT).show();
                         Log.i(TAG, "onClick: password not match");
                         return;
                     }

@@ -4,6 +4,9 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
+/**
+ * Lớp để lưu trử dữ liệu
+ */
 public class School {
     private String name;
     private String address;

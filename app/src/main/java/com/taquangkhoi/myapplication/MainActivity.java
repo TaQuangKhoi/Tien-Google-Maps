@@ -303,6 +303,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    /*
+     * Hàm chạy Intent để tìm kiếm địa điểm
+     */
     public void onSearchCalled() {
         // Set the fields to specify which types of place data to return.
         List<Place.Field> fields = asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
@@ -314,6 +317,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .build(this);
         startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
     }
+
+    /*
+     * Hàm chạy khi kết quả trả về từ Intent tìm kiếm địa điểm
+     *
+     */
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -339,11 +347,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // The user canceled the operation.
             }
         }
-    }
-
-    // Event Tìm kiếm địa điểm của SearchView
-    private void addSearchViewEvents() {
-
     }
 
     // Yêu cầu quyền truy cập vị trí
@@ -429,6 +432,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    // Bắt sự kiện khi người dùng nhấn vào Marker
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Log.i("Marker", "Marker Clicked");
@@ -444,6 +448,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return false;
     }
 
+    // Hiện BottomSheet Dialog
     private void showBottomSheetDialog(String placeId) throws InterruptedException {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         bottomSheetDialog.setContentView(R.layout.location_info);
@@ -534,10 +539,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Log.i(TAG, "searchSchool URL " + urlNearbySearchSchool);
 
-        Request request = new Request.Builder()
-                .url(urlNearbySearchSchool)
-                .build();
-
+        // biến hứng data trả về
         final String[] response = {null};
         List<School> schools = new ArrayList<>();
 
@@ -577,16 +579,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         thread.start();
         thread.join();
 
-        // get current LatLng
+        // Zoom về vị trí hiện tại
         LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
 
+        // Thêm các Marker
         for (School school : schools) {
             mMap.addMarker(new MarkerOptions()
                     .position(school.getLatLng())
                     .title(school.getName())
                     .snippet(school.getAddress())
-                    );
+            );
         }
 
     }
